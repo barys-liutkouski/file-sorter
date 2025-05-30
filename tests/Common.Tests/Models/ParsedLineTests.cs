@@ -1,6 +1,5 @@
-using Common.Models;
 using System.Text;
-using Xunit;
+using Common.Models;
 
 namespace Common.Tests.Models;
 
@@ -120,7 +119,6 @@ public class ParsedLineTests
         Assert.True(line1 >= line2);
     }
 
-
     [Fact]
     public void ToStringReturnsCorrectFormat()
     {
@@ -132,7 +130,12 @@ public class ParsedLineTests
     [InlineData("123. Some Text", true, 123L, "Some Text")]
     [InlineData("456.  Leading Space Text", true, 456L, "Leading Space Text")]
     [InlineData(" 789 .  Spaces around dot ", true, 789L, "Spaces around dot")]
-    public void TryParseValidInputReturnsTrueAndCorrectParsedLine(string input, bool expectedSuccess, long expectedNumber, string expectedText)
+    public void TryParseValidInputReturnsTrueAndCorrectParsedLine(
+        string input,
+        bool expectedSuccess,
+        long expectedNumber,
+        string expectedText
+    )
     {
         bool success = ParsedLine.TryParse(input, _defaultEncoding, out ParsedLine result, out string error);
         Assert.Equal(expectedSuccess, success);
@@ -149,7 +152,10 @@ public class ParsedLineTests
     [InlineData("", "Malformed line: is null or empty")]
     [InlineData("123 NoDotSeparator", "Malformed line: no dot or no text after dot. Value: 123 NoDotSeparator")]
     [InlineData("123.", "Malformed line: no dot or no text after dot. Value: 123.")]
-    [InlineData("abc. InvalidNumberPart", "Malformed line (invalid number part \'abc\'). Full line: abc. InvalidNumberPart")]
+    [InlineData(
+        "abc. InvalidNumberPart",
+        "Malformed line (invalid number part \'abc\'). Full line: abc. InvalidNumberPart"
+    )]
     [InlineData(". TextStartsWithDot", "Malformed line (invalid number part ''). Full line: . TextStartsWithDot")]
     public void TryParseInvalidInputReturnsFalseAndErrorMessage(string? input, string expectedErrorFragment)
     {

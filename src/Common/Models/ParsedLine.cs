@@ -6,7 +6,10 @@ using Common.Interfaces;
 
 namespace Common.Models;
 
-public readonly struct ParsedLine(long number, string text) : IComparable<ParsedLine>, IStringSerializable<ParsedLine>, IEquatable<ParsedLine>
+public readonly struct ParsedLine(long number, string text)
+    : IComparable<ParsedLine>,
+        IStringSerializable<ParsedLine>,
+        IEquatable<ParsedLine>
 {
     public readonly long Number = number;
     public readonly string Text = text;
@@ -37,8 +40,11 @@ public readonly struct ParsedLine(long number, string text) : IComparable<Parsed
     }
 
     public static bool operator <(ParsedLine left, ParsedLine right) => left.CompareTo(right) < 0;
+
     public static bool operator <=(ParsedLine left, ParsedLine right) => left.CompareTo(right) <= 0;
+
     public static bool operator >(ParsedLine left, ParsedLine right) => left.CompareTo(right) > 0;
+
     public static bool operator >=(ParsedLine left, ParsedLine right) => left.CompareTo(right) >= 0;
 
     public readonly int CompareTo(ParsedLine other)

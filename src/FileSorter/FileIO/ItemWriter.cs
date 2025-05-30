@@ -11,9 +11,9 @@ public class ItemWriter<T> : IItemWriter<T>
     private readonly FileStream _fileStream;
     private readonly StreamWriter _streamWriter;
 
-    public ItemWriter(string path, Encoding encoding)
+    public ItemWriter(string path, Encoding encoding, int bufferSize = 4 * 1024 * 1024)
     {
-        _fileStream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize: 4 * 1024 * 1024);
+        _fileStream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize);
         _streamWriter = new StreamWriter(_fileStream, encoding);
     }
 

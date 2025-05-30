@@ -1,5 +1,5 @@
-using System.Text;
 using System.Diagnostics;
+using System.Text;
 using Common.Models;
 using Microsoft.Extensions.Logging;
 
@@ -55,7 +55,10 @@ public class SortOrderAuditor
                 sortedFileLines++;
                 if (string.IsNullOrWhiteSpace(line))
                 {
-                    _logger.LogWarning("Encountered empty line at sorted file line {SortedFileLines}. Skipping.", sortedFileLines);
+                    _logger.LogWarning(
+                        "Encountered empty line at sorted file line {SortedFileLines}. Skipping.",
+                        sortedFileLines
+                    );
                     continue;
                 }
 
@@ -74,7 +77,12 @@ public class SortOrderAuditor
                             violationLineNumber = sortedFileLines;
                             previousLineContent = previousParsedLine.Value.ToString();
                             currentLineContent = currentParsedLine.ToString();
-                            _logger.LogError("Sorting violation at line {ViolationLineNumber}. Previous: {PreviousLineContent}, Current: {CurrentLineContent}.", violationLineNumber, previousLineContent, currentLineContent);
+                            _logger.LogError(
+                                "Sorting violation at line {ViolationLineNumber}. Previous: {PreviousLineContent}, Current: {CurrentLineContent}.",
+                                violationLineNumber,
+                                previousLineContent,
+                                currentLineContent
+                            );
 
                             break;
                         }
@@ -87,13 +95,17 @@ public class SortOrderAuditor
                 }
                 else
                 {
-
                     isProperlySorted = false;
                     violationLineNumber = sortedFileLines;
                     previousLineContent = previousParsedLine?.ToString() ?? "N/A (first or previous was invalid)";
                     currentLineContent = line;
                     var errorMessage = error;
-                    _logger.LogError("Could not parse line {SortedFileLines} in sorted file: {LineContent}. Reason: {ErrorMessage}", sortedFileLines, line, errorMessage);
+                    _logger.LogError(
+                        "Could not parse line {SortedFileLines} in sorted file: {LineContent}. Reason: {ErrorMessage}",
+                        sortedFileLines,
+                        line,
+                        errorMessage
+                    );
                     break;
                 }
             }
@@ -105,7 +117,10 @@ public class SortOrderAuditor
         }
 
         stopwatch.Stop();
-        _logger.LogInformation("Verification completed in {ElapsedSeconds:F2} seconds.", stopwatch.Elapsed.TotalSeconds);
+        _logger.LogInformation(
+            "Verification completed in {ElapsedSeconds:F2} seconds.",
+            stopwatch.Elapsed.TotalSeconds
+        );
 
         return new VerificationResult(
             OriginalFileLinesProcessed: originalFileLines,

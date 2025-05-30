@@ -7,6 +7,7 @@ public interface IKWayMerger
     Task PerformKWayMergeAsync<T>(
         IReadOnlyList<IAsyncEnumerable<T>> inputStreams,
         IItemWriter<T> outputWriter,
-        Action<string> progressCallback)
+        Action<string> progressCallback
+    )
         where T : IComparable<T>;
 }

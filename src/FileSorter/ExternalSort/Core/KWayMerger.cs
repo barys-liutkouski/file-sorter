@@ -1,5 +1,5 @@
-using FileSorter.FileIO.Interfaces;
 using FileSorter.ExternalSort.Core.Interfaces;
+using FileSorter.FileIO.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace FileSorter.ExternalSort.Core;
@@ -28,7 +28,8 @@ public class KWayMerger : IKWayMerger
     public async Task PerformKWayMergeAsync<T>(
         IReadOnlyList<IAsyncEnumerable<T>> inputStreams,
         IItemWriter<T> outputWriter,
-        Action<string> progressCallback)
+        Action<string> progressCallback
+    )
         where T : IComparable<T>
     {
         ArgumentNullException.ThrowIfNull(inputStreams);
@@ -87,7 +88,10 @@ public class KWayMerger : IKWayMerger
                     await enumerator.DisposeAsync();
                 }
             }
-            _logger.LogInformation("K-way merge completed: {TotalLinesWritten:N0} total lines written", totalLinesWritten);
+            _logger.LogInformation(
+                "K-way merge completed: {TotalLinesWritten:N0} total lines written",
+                totalLinesWritten
+            );
         }
         finally
         {

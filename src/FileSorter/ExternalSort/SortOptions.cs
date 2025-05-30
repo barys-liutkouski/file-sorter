@@ -6,5 +6,6 @@ public record SortOptions(
     Encoding Encoding,
     Action<string> ProgressCallback,
     int MaxChunkSizeMB,
-    int MaxFileHandles
+    int MaxFileHandles,
+    int FileBufferSize
 );

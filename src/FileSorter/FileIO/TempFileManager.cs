@@ -24,7 +24,11 @@ public class TempFileManager : ITempFileManager
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to create or access custom temporary directory {DirectoryPath}. Falling back to default temporary directory.", _customTempDirectory);
+                _logger.LogError(
+                    ex,
+                    "Failed to create or access custom temporary directory {DirectoryPath}. Falling back to default temporary directory.",
+                    _customTempDirectory
+                );
                 _customTempDirectory = null;
                 throw;
             }
@@ -49,7 +53,11 @@ public class TempFileManager : ITempFileManager
         }
 
         _temporaryFiles.Add(tempFilePath);
-        _logger.LogInformation("Created temporary file: {FileName} in directory {Directory}", Path.GetFileName(tempFilePath), effectiveTempDirectory);
+        _logger.LogInformation(
+            "Created temporary file: {FileName} in directory {Directory}",
+            Path.GetFileName(tempFilePath),
+            effectiveTempDirectory
+        );
         return tempFilePath;
     }
 
@@ -75,16 +83,24 @@ public class TempFileManager : ITempFileManager
                     deletedFiles++;
                     _logger.LogInformation("Deleted temporary file: {FileName}", Path.GetFileName(tempFile));
                 }
-
             }
             catch (Exception ex)
             {
                 failedDeletions++;
-                _logger.LogWarning(ex, "Failed to delete temporary file {FileName}: {ErrorMessage}", Path.GetFileName(tempFile), ex.Message);
+                _logger.LogWarning(
+                    ex,
+                    "Failed to delete temporary file {FileName}: {ErrorMessage}",
+                    Path.GetFileName(tempFile),
+                    ex.Message
+                );
             }
         }
         _temporaryFiles.RemoveAll(filesToRemove.Contains);
-        _logger.LogInformation("Cleanup completed: {DeletedFiles} files deleted, {FailedDeletions} failed deletions", deletedFiles, failedDeletions);
+        _logger.LogInformation(
+            "Cleanup completed: {DeletedFiles} files deleted, {FailedDeletions} failed deletions",
+            deletedFiles,
+            failedDeletions
+        );
     }
 
     public void Dispose()

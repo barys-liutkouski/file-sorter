@@ -9,16 +9,18 @@ public class ChunkReader<T> : IAsyncEnumerable<T>
 {
     private readonly string _path;
     private readonly Encoding _encoding;
+    private readonly int _bufferSize;
 
-    public ChunkReader(string path, Encoding encoding)
+    public ChunkReader(string path, Encoding encoding, int bufferSize = 4 * 1024 * 1024)
     {
         _path = path;
         _encoding = encoding;
+        _bufferSize = bufferSize;
     }
 
     public async IAsyncEnumerator<T> GetAsyncEnumerator(CancellationToken cancellationToken = default)
     {
-        using var fs = new FileStream(_path, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 4 * 1024 * 1024);
+        using var fs = new FileStream(_path, FileMode.Open, FileAccess.Read, FileShare.Read, _bufferSize);
         using var reader = new StreamReader(fs);
 
         while (true)
@@ -37,7 +39,6 @@ public class ChunkReader<T> : IAsyncEnumerable<T>
             {
                 throw new LineParsingException(error);
             }
-
         }
     }
 }

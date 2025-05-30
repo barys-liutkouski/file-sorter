@@ -7,15 +7,64 @@ public class RandomFileGenerator
 {
     private readonly Random _random = new Random();
     private readonly List<StringBuilder> _stringPool = new();
-    private readonly string[] _words = {
-            "apple", "banana", "cherry", "date", "elderberry", "fig", "grape", "honeydew",
-            "kiwi", "lemon", "mango", "nectarine", "orange", "papaya", "quince", "raspberry",
-            "strawberry", "tangerine", "ugli", "vanilla", "watermelon", "yam", "zucchini",
-            "amazing", "brilliant", "creative", "dynamic", "energetic", "fantastic", "gorgeous", "helpful",
-            "incredible", "joyful", "kind", "lovely", "magnificent", "natural", "outstanding", "powerful",
-            "quick", "radiant", "stunning", "tremendous", "unique", "vibrant", "wonderful", "excellent",
-            "beautiful", "charming", "delightful", "elegant", "fabulous", "graceful", "harmonious", "inspiring"
-        };
+    private readonly string[] _words =
+    {
+        "apple",
+        "banana",
+        "cherry",
+        "date",
+        "elderberry",
+        "fig",
+        "grape",
+        "honeydew",
+        "kiwi",
+        "lemon",
+        "mango",
+        "nectarine",
+        "orange",
+        "papaya",
+        "quince",
+        "raspberry",
+        "strawberry",
+        "tangerine",
+        "ugli",
+        "vanilla",
+        "watermelon",
+        "yam",
+        "zucchini",
+        "amazing",
+        "brilliant",
+        "creative",
+        "dynamic",
+        "energetic",
+        "fantastic",
+        "gorgeous",
+        "helpful",
+        "incredible",
+        "joyful",
+        "kind",
+        "lovely",
+        "magnificent",
+        "natural",
+        "outstanding",
+        "powerful",
+        "quick",
+        "radiant",
+        "stunning",
+        "tremendous",
+        "unique",
+        "vibrant",
+        "wonderful",
+        "excellent",
+        "beautiful",
+        "charming",
+        "delightful",
+        "elegant",
+        "fabulous",
+        "graceful",
+        "harmonious",
+        "inspiring",
+    };
     private readonly char[] chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".ToCharArray();
 
     private const int StringPoolSize = 1000;
@@ -45,7 +94,11 @@ public class RandomFileGenerator
 
             if (lines % 5000000 == 0)
             {
-                _logger.LogInformation("Generated {CurrentSize:N0}mb of {TargetSize:N0}", currentSize / 1024 / 1024, targetSize / 1024 / 1024);
+                _logger.LogInformation(
+                    "Generated {CurrentSize:N0}mb of {TargetSize:N0}",
+                    currentSize / 1024 / 1024,
+                    targetSize / 1024 / 1024
+                );
             }
         }
     }

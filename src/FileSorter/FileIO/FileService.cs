@@ -1,7 +1,7 @@
 using System.Text;
-using Microsoft.Extensions.Logging;
-using FileSorter.FileIO.Interfaces;
 using Common.Interfaces;
+using FileSorter.FileIO.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace FileSorter.FileIO;
 
@@ -16,7 +16,11 @@ public class FileService<T> : IFileService<T>
     }
 
     public async IAsyncEnumerable<List<T>> ReadFileInChunksAsync(
-        string filePath, Encoding encoding, int maxChunkSizeMB)
+        string filePath,
+        Encoding encoding,
+        int maxChunkSizeMB,
+        int bufferSize = 4 * 1024 * 1024
+    )
     {
         ArgumentNullException.ThrowIfNull(encoding);
 
@@ -24,7 +28,13 @@ public class FileService<T> : IFileService<T>
         long chunkSize = 0;
         long maxChunkSize = (long)maxChunkSizeMB * 1024 * 1024;
 
-        using var fileStream = new FileStream(filePath, FileMode.Open);
+        using var fileStream = new FileStream(
+            filePath,
+            FileMode.Open,
+            FileAccess.Read,
+            FileShare.Read,
+            bufferSize: bufferSize
+        );
         using var reader = new StreamReader(fileStream);
 
         while (true)

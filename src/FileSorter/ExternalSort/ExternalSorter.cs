@@ -1,11 +1,11 @@
 using System.Text;
-using Microsoft.Extensions.Logging;
-using FileSorter.ExternalSort.Core.Interfaces;
-using FileSorter.ExternalSort.Core;
-using FileSorter.ExternalSort.Interfaces;
-using FileSorter.FileIO.Interfaces;
-using FileSorter.FileIO;
 using Common.Interfaces;
+using FileSorter.ExternalSort.Core;
+using FileSorter.ExternalSort.Core.Interfaces;
+using FileSorter.ExternalSort.Interfaces;
+using FileSorter.FileIO;
+using FileSorter.FileIO.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace FileSorter.ExternalSort;
 
@@ -18,7 +18,12 @@ public class ExternalSorter<T> : IExternalSorter
     private readonly ILogger<ExternalSorter<T>> _logger;
     private bool _disposedValue;
 
-    public ExternalSorter(IFileService<T> fileService, ITempFileManager tempFileManager, IKWayMerger kWayMerger, ILogger<ExternalSorter<T>> logger)
+    public ExternalSorter(
+        IFileService<T> fileService,
+        ITempFileManager tempFileManager,
+        IKWayMerger kWayMerger,
+        ILogger<ExternalSorter<T>> logger
+    )
     {
         _fileService = fileService ?? throw new ArgumentNullException(nameof(fileService));
         _tempFileManager = tempFileManager ?? throw new ArgumentNullException(nameof(tempFileManager));
@@ -33,27 +38,43 @@ public class ExternalSorter<T> : IExternalSorter
         ArgumentNullException.ThrowIfNull(sortOptions.Encoding);
 
         _logger.LogInformation("Starting chunked file sorting...");
-        _logger.LogInformation("Using encoding: {EncodingName} ({EncodingWebName})", sortOptions.Encoding.EncodingName, sortOptions.Encoding.WebName);
+        _logger.LogInformation(
+            "Using encoding: {EncodingName} ({EncodingWebName})",
+            sortOptions.Encoding.EncodingName,
+            sortOptions.Encoding.WebName
+        );
 
         var tempFiles = new List<string>();
 
         try
         {
-            await foreach (var nextChunk in _fileService.ReadFileInChunksAsync(inputFilePath, sortOptions.Encoding, sortOptions.MaxChunkSizeMB))
+            await foreach (
+                var nextChunk in _fileService.ReadFileInChunksAsync(
+                    inputFilePath,
+                    sortOptions.Encoding,
+                    sortOptions.MaxChunkSizeMB,
+                    sortOptions.FileBufferSize
+                )
+            )
             {
                 var tempFilePath = _tempFileManager.CreateTemporaryFile();
                 tempFiles.Add(tempFilePath);
 
                 nextChunk.Sort();
-                await WriteChunkToFileAsync(tempFilePath, sortOptions.Encoding, nextChunk);
+                await WriteChunkToFileAsync(tempFilePath, nextChunk, sortOptions);
 
-                sortOptions.ProgressCallback($"Chunk {tempFiles.Count} read, sorted, and written, to temporary file: {tempFilePath}.");
+                sortOptions.ProgressCallback(
+                    $"Chunk {tempFiles.Count} read, sorted, and written, to temporary file: {tempFilePath}."
+                );
             }
 
             _logger.LogInformation("Created {TempFileCount} temporary files for sorted chunks", tempFiles.Count);
 
             await KWayMergeFilesAsync(tempFiles, outputFilePath, sortOptions);
-            _logger.LogInformation("K-way merge completed - final sorted file written to: {OutputFilePath}", outputFilePath);
+            _logger.LogInformation(
+                "K-way merge completed - final sorted file written to: {OutputFilePath}",
+                outputFilePath
+            );
         }
         finally
         {
@@ -65,15 +86,20 @@ public class ExternalSorter<T> : IExternalSorter
     {
         if (fileNames.Count <= sortOptions.MaxFileHandles)
         {
-            var inputStreams = fileNames.Select(filename => new ChunkReader<T>(filename, sortOptions.Encoding)).ToList();
-            using var output = new ItemWriter<T>(outputFileName, sortOptions.Encoding);
+            var inputStreams = fileNames
+                .Select(filename => new ChunkReader<T>(filename, sortOptions.Encoding, sortOptions.FileBufferSize))
+                .ToList();
+            using var output = new ItemWriter<T>(outputFileName, sortOptions.Encoding, sortOptions.FileBufferSize);
             await _kWayMerger.PerformKWayMergeAsync(inputStreams, output, sortOptions.ProgressCallback);
             return;
         }
 
         var chunks = fileNames.Chunk(sortOptions.MaxFileHandles).ToList();
 
-        _logger.LogInformation("Too many chunks for a single k-way merge. Split to {ChunkCount} sub-chunks", chunks.Count);
+        _logger.LogInformation(
+            "Too many chunks for a single k-way merge. Split to {ChunkCount} sub-chunks",
+            chunks.Count
+        );
 
         var tempResultFiles = new List<string>();
 
@@ -85,16 +111,20 @@ public class ExternalSorter<T> : IExternalSorter
 
             await KWayMergeFilesAsync(chunk.ToList(), chunkResultFile, sortOptions);
 
-            _logger.LogInformation("Finished k-way merge for sub-chunk {ChunkNumber}. {ChunksRemaining} sub-chunks remaining", ++chunkNumber, chunks.Count - chunkNumber);
+            _logger.LogInformation(
+                "Finished k-way merge for sub-chunk {ChunkNumber}. {ChunksRemaining} sub-chunks remaining",
+                ++chunkNumber,
+                chunks.Count - chunkNumber
+            );
             _tempFileManager.CleanupTemporaryFiles(chunk);
         }
 
         await KWayMergeFilesAsync(tempResultFiles, outputFileName, sortOptions);
     }
 
-    private async Task WriteChunkToFileAsync(string filePath, Encoding encoding, List<T> chunk)
+    private async Task WriteChunkToFileAsync(string filePath, List<T> chunk, SortOptions sortOptions)
     {
-        using var writer = new ItemWriter<T>(filePath, encoding);
+        using var writer = new ItemWriter<T>(filePath, sortOptions.Encoding, sortOptions.FileBufferSize);
         foreach (var item in chunk)
         {
             await writer.WriteAsync(item);
